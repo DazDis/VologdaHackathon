@@ -1,13 +1,12 @@
 import xml.etree.ElementTree as ET
 import pandas as pd
 import matplotlib.pyplot as plt
-import argparse
 from pathlib import Path
 import numpy as np
 from collections import defaultdict
 
 
-def parse_xml_log(xml_path):
+def parse_xml_log(xml_path='log.xml'):
     """Парсинг XML файла и извлечение данных"""
     tree = ET.parse(xml_path)
     root = tree.getroot()
@@ -107,7 +106,6 @@ def normalize_language(language_id):
     elif 'haskell' in language_id:
         return 'Haskell'
     else:
-        # Возвращаем оригинальное название для неизвестных языков
         return language_id.split('_')[0].upper() if '_' in language_id else language_id.upper()
 
 
@@ -120,7 +118,7 @@ def create_language_vectors(participants, submissions, df_total,
     filtered_participants = {}
     for uid, data in participants.items():
         # Проверяем класс
-        grade_ok = (target_grade is None) or (data['grade'] == target_grade)
+        grade_ok = (target_grade is None) or (str(data['grade']) == str(target_grade))
 
         # Проверяем муниципалитет
         municipality_ok = (target_municipality is None) or (data['municipality'] == target_municipality)
@@ -145,7 +143,6 @@ def create_language_vectors(participants, submissions, df_total,
     df_filtered = df_submissions[df_submissions['user_id'].isin(filtered_user_ids)]
 
     if df_filtered.empty:
-        print("Нет данных для выбранных критериев фильтрации.")
         return None, None, None
 
     # Сначала собираем все УНИКАЛЬНЫЕ языки для каждого участника
@@ -188,9 +185,19 @@ def create_language_vectors(participants, submissions, df_total,
     df_vectors = pd.DataFrame(vectors_data, columns=columns)
 
     # Добавляем информацию об участниках
-    df_vectors['name'] = df_vectors['user_id'].map(lambda x: participants[x]['name'])
-    df_vectors['grade'] = df_vectors['user_id'].map(lambda x: participants[x]['grade'])
-    df_vectors['municipality'] = df_vectors['user_id'].map(lambda x: participants[x]['municipality'])
+    df_vectors['Имя'] = df_vectors['user_id'].map(lambda x: participants[x]['name'])
+    df_vectors['Класс'] = df_vectors['user_id'].map(lambda x: participants[x]['grade'])
+    df_vectors['Муниципалитет'] = df_vectors['user_id'].map(lambda x: participants[x]['municipality'])
+
+    # Добавляем общий балл участника
+    df_vectors['Общий_балл'] = df_vectors['user_id'].map(
+        lambda x: df_filtered_total[df_filtered_total['user_id'] == x]['total_score'].iloc[0]
+        if not df_filtered_total[df_filtered_total['user_id'] == x].empty else 0
+    )
+
+    # Переупорядочиваем столбцы
+    column_order = ['Имя', 'Класс', 'Муниципалитет', 'Общий_балл'] + top_languages
+    df_vectors = df_vectors[column_order]
 
     # Суммируем все векторы (получаем количество УНИКАЛЬНЫХ участников по каждому языку)
     language_sums = df_vectors[top_languages].sum()
@@ -198,14 +205,13 @@ def create_language_vectors(participants, submissions, df_total,
     # Сортируем языки по количеству участников (по убыванию)
     language_sums = language_sums.sort_values(ascending=False)
 
-    return df_vectors, language_sums, lang_to_index
+    return df_vectors, language_sums, top_languages
 
 
-def visualize_language_vectors(language_sums, total_participants, output_file='language_vectors.png'):
+def visualize_language_vectors(language_sums, total_participants, params, output_file='language_vectors.png'):
     """Визуализация результатов в виде диаграммы"""
 
     if language_sums.empty:
-        print("Нет данных для визуализации.")
         return None
 
     # Создаем диаграмму
@@ -223,16 +229,30 @@ def visualize_language_vectors(language_sums, total_participants, output_file='l
                  f'{int(height)}', ha='center', va='bottom', fontsize=10, fontweight='bold')
 
     # Настройка графика
-    plt.title('Количество участников по языкам программирования', fontsize=16, fontweight='bold', pad=20)
+    title = 'Количество участников по языкам программирования\n'
+
+    # Добавляем информацию о фильтрах в заголовок
+    subtitle_parts = []
+    if params['grade']:
+        subtitle_parts.append(f'Класс: {params["grade"]}')
+    if params['municipality']:
+        subtitle_parts.append(f'Муниципалитет: {params["municipality"]}')
+    if params['min_score'] is not None or params['max_score'] is not None:
+        min_score = params['min_score'] if params['min_score'] is not None else 0
+        max_score = params['max_score'] if params['max_score'] is not None else '∞'
+        subtitle_parts.append(f'Баллы: {min_score}-{max_score}')
+
+    if subtitle_parts:
+        title += ' | '.join(subtitle_parts)
+
+    plt.title(title, fontsize=16, fontweight='bold', pad=20)
     plt.xlabel('Язык программирования', fontsize=12)
     plt.ylabel('Количество уникальных участников', fontsize=12)
 
     plt.xticks(rotation=45, ha='right', fontsize=10)
     plt.grid(axis='y', alpha=0.3, linestyle='--')
 
-    # Добавляем информацию
 
-    plt.tight_layout()
 
     # Сохраняем диаграмму
     plt.savefig(output_file, dpi=300, bbox_inches='tight')
@@ -240,91 +260,156 @@ def visualize_language_vectors(language_sums, total_participants, output_file='l
     # Показываем диаграмму
     plt.show()
 
-    return language_sums
+    return output_file
+
+
+def save_to_csv(df_vectors, language_sums, params, base_filename='language_analysis'):
+    """Сохранение результатов в CSV файлы"""
+
+    if df_vectors is None or df_vectors.empty:
+        return []
+
+    # Создаем основную таблицу с участниками
+    main_csv = f"{base_filename}_participants.csv"
+    df_vectors.to_csv(main_csv, sep=';', index=False, encoding='utf-8-sig')
+
+    # Создаем файл со статистикой по языкам
+    stats_csv = f"{base_filename}_languages.csv"
+    stats_data = []
+    total_participants = len(df_vectors)
+
+    for lang, count in language_sums.items():
+        percentage = (count / total_participants) * 100 if total_participants > 0 else 0
+        stats_data.append({
+            'Язык программирования': lang,
+            'Количество участников': int(count),
+            'Доля участников (%)': round(percentage, 2)
+        })
+
+    df_stats = pd.DataFrame(stats_data)
+    df_stats.to_csv(stats_csv, sep=';', index=False, encoding='utf-8-sig')
+
+    # Создаем файл с параметрами анализа
+    params_csv = f"{base_filename}_params.csv"
+    params_data = [{
+        'Параметр': 'Класс',
+        'Значение': params['grade'] if params['grade'] else 'Все'
+    }, {
+        'Параметр': 'Муниципалитет',
+        'Значение': params['municipality'] if params['municipality'] else 'Все'
+    }, {
+        'Параметр': 'Минимальный балл',
+        'Значение': params['min_score'] if params['min_score'] is not None else 'Любой'
+    }, {
+        'Параметр': 'Максимальный балл',
+        'Значение': params['max_score'] if params['max_score'] is not None else 'Любой'
+    }, {
+        'Параметр': 'Топ языков',
+        'Значение': params['top_n']
+    }, {
+        'Параметр': 'Всего участников',
+        'Значение': total_participants
+    }, {
+        'Параметр': 'Языков проанализировано',
+        'Значение': len(language_sums)
+    }, {
+        'Параметр': 'Сумма элементов векторов',
+        'Значение': int(language_sums.sum())
+    }]
+
+    df_params = pd.DataFrame(params_data)
+    df_params.to_csv(params_csv, sep=';', index=False, encoding='utf-8-sig')
+
+    return [main_csv, stats_csv, params_csv]
+
+
+def get_user_input():
+    """Получение параметров от пользователя"""
+    # Проверяем существование файла
+    if not Path('log.xml').exists():
+        print("Ошибка: Файл log.xml не найден.")
+        return None
+
+    # Запрашиваем класс
+    grade_input = input("Введите номер класса (9, 10, 11) или Enter для всех классов: ").strip()
+    grade = int(grade_input) if grade_input.isdigit() else None
+
+    # Запрашиваем муниципалитет
+    municipality = input("Введите муниципалитет или Enter для всех: ").strip()
+    municipality = municipality if municipality else None
+
+    # Запрашиваем диапазон баллов
+    print("\nДиапазон баллов участников:")
+    min_score_input = input("Минимальный балл (или Enter для любого): ").strip()
+    max_score_input = input("Максимальный балл (или Enter для любого): ").strip()
+
+    min_score = float(min_score_input) if min_score_input.replace('.', '', 1).isdigit() else None
+    max_score = float(max_score_input) if max_score_input.replace('.', '', 1).isdigit() else None
+
+    # Запрашиваем количество языков для анализа
+    top_n_input = input("\nСколько топ языков анализировать (по умолчанию 9): ").strip()
+    top_n = int(top_n_input) if top_n_input.isdigit() else 9
+
+    # Запрашиваем префикс для файлов
+    output_prefix = input("\nВведите префикс для выходных файлов (по умолчанию 'analysis'): ").strip()
+    if not output_prefix:
+        output_prefix = 'analysis'
+
+    # Собираем параметры
+    params = {
+        'grade': grade,
+        'municipality': municipality,
+        'min_score': min_score,
+        'max_score': max_score,
+        'top_n': top_n,
+        'output_prefix': output_prefix
+    }
+
+    return params
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Анализ использования языков программирования с векторами')
-    parser.add_argument('--xml', default='log.xml', help='Путь к XML файлу с логами')
-    parser.add_argument('--output', default='language_vectors.png', help='Путь для сохранения диаграммы')
-    parser.add_argument('--grade', help='Фильтр по классу (например: 9, 10, 11)')
-    parser.add_argument('--municipality', help='Фильтр по муниципалитету')
-    parser.add_argument('--min-score', type=float, help='Минимальный балл участника')
-    parser.add_argument('--max-score', type=float, help='Максимальный балл участника')
-    parser.add_argument('--csv-output', default='language_vectors.csv', help='Путь для сохранения CSV с векторами')
-    parser.add_argument('--show-vectors', action='store_true', help='Показать векторы участников')
-    parser.add_argument('--top-n', type=int, default=9, help='Количество топ языков для анализа (по умолчанию: 9)')
-
-    args = parser.parse_args()
-
-    # Проверяем существование файла
-    if not Path(args.xml).exists():
-        print(f"Файл {args.xml} не найден.")
+    # Получаем параметры от пользователя
+    params = get_user_input()
+    if params is None:
         return
-
 
     try:
         # Парсим XML
-        participants, submissions = parse_xml_log(args.xml)
+        participants, submissions = parse_xml_log('log.xml')
 
         # Получаем лучшие баллы участников
         df_total = get_best_scores(participants, submissions)
 
         # Создаем векторы языков
-        df_vectors, language_sums, lang_to_index = create_language_vectors(
+        result = create_language_vectors(
             participants=participants,
             submissions=submissions,
             df_total=df_total,
-            target_grade=args.grade,
-            target_municipality=args.municipality,
-            min_score=args.min_score,
-            max_score=args.max_score,
-            top_n=args.top_n
+            target_grade=params['grade'],
+            target_municipality=params['municipality'],
+            min_score=params['min_score'],
+            max_score=params['max_score'],
+            top_n=params['top_n']
         )
 
-        if df_vectors is None:
-            print("Не удалось создать векторы. Проверьте критерии фильтрации.")
+        if result[0] is None:
+            print("Нет данных для выбранных критериев фильтрации.")
             return
 
-        # Выводим информацию о векторах
+        df_vectors, language_sums, top_languages = result
+
         total_participants = len(df_vectors)
 
-        # Создаем визуализацию
-        if not language_sums.empty:
-            # Визуализируем
-            result = visualize_language_vectors(language_sums, total_participants, args.output)
+        # Сохраняем в CSV
+        csv_files = save_to_csv(df_vectors, language_sums, params, params['output_prefix'])
 
-
-            for lang, count in language_sums.items():
-                percentage = (count / total_participants) * 100
-
-            # Суммируем все векторы
-            sum_vector = language_sums.values
-
-
-            # Показываем пример вектора
-
-            for i, (_, row) in enumerate(df_vectors.head().iterrows()):
-                vector = [row[lang] for lang in language_sums.index]
-                vector_str = ''.join(str(int(v)) for v in vector)
-
-
-            # Статистика по количеству языков на участника
-
-            df_vectors['num_languages'] = df_vectors[language_sums.index].sum(axis=1)
-            lang_stats = df_vectors['num_languages'].value_counts().sort_index()
-
-            for num_langs, count in lang_stats.items():
-                percentage = (count / total_participants) * 100
-
-
-        # Сохраняем векторы в CSV
-        df_vectors.to_csv(args.csv_output, sep=';', index=False, encoding='utf-8-sig')
+        # Создаем диаграмму
+        diagram_file = f"{params['output_prefix']}_diagram.png"
+        visualize_language_vectors(language_sums, total_participants, params, diagram_file)
 
     except Exception as e:
         print(f"Произошла ошибка: {e}")
-        import traceback
-        traceback.print_exc()
 
 
 if __name__ == "__main__":
