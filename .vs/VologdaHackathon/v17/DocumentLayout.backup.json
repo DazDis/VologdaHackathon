@@ -7,7 +7,7 @@
       "RelativeMoniker": "D:0:0:{6DD41FA3-8E4D-4407-97C1-1BFE04D52DF4}|VologdaHackathon\\VologdaHackathon.csproj|solutionrelative:vologdahackathon\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6DD41FA3-8E4D-4407-97C1-1BFE04D52DF4}|VologdaHackathon\\VologdaHackathon.csproj|c:\\users\\arraki\\vologdahackathon\\vologdahackathon\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "AbsoluteMoniker": "D:0:0:{6DD41FA3-8E4D-4407-97C1-1BFE04D52DF4}|VologdaHackathon\\VologdaHackathon.csproj|C:\\Users\\Arraki\\VologdaHackathon\\vologdahackathon\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
       "RelativeMoniker": "D:0:0:{6DD41FA3-8E4D-4407-97C1-1BFE04D52DF4}|VologdaHackathon\\VologdaHackathon.csproj|solutionrelative:vologdahackathon\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     }
   ],
@@ -28,7 +28,7 @@
               "RelativeDocumentMoniker": "VologdaHackathon\\Form1.cs",
               "ToolTip": "C:\\Users\\Arraki\\VologdaHackathon\\VologdaHackathon\\Form1.cs",
               "RelativeToolTip": "VologdaHackathon\\Form1.cs",
-              "ViewState": "AgIAAA4AAAAAAAAAAADwvxUAAAANAAAAAAAAAA==",
+              "ViewState": "AgIAAAcAAAAAAAAAAAA+wBAAAABnAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-12-05T08:16:44.796Z",
               "EditorCaption": ""
@@ -42,8 +42,7 @@
               "ToolTip": "C:\\Users\\Arraki\\VologdaHackathon\\VologdaHackathon\\Form1.cs [\u041A\u043E\u043D\u0441\u0442\u0440\u0443\u043A\u0442\u043E\u0440]",
               "RelativeToolTip": "VologdaHackathon\\Form1.cs [\u041A\u043E\u043D\u0441\u0442\u0440\u0443\u043A\u0442\u043E\u0440]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-05T08:15:52.604Z",
-              "EditorCaption": " [\u041A\u043E\u043D\u0441\u0442\u0440\u0443\u043A\u0442\u043E\u0440]"
+              "WhenOpened": "2025-12-05T08:15:52.604Z"
             }
           ]
         }

@@ -14,7 +14,7 @@ namespace VologdaHackathon
 
         private void button1_Click(object sender, EventArgs e)
         {
-            string filePath = @"./Files/1.py";
+            string filePath = @"C:\Users\Arraki\VologdaHackathon\VologdaHackathon\bin\Debug\Files\1.py";
             if (!File.Exists(filePath))
             {
                 MessageBox.Show("Файл не найден!");
@@ -36,7 +36,7 @@ namespace VologdaHackathon
 
         private void button2_Click(object sender, EventArgs e)
         {
-            string filePath = @"./Files/2.py";
+            string filePath = @"C:\Users\Arraki\VologdaHackathon\VologdaHackathon\bin\Debug\Files\2.py";
             if (!File.Exists(filePath))
             {
                 MessageBox.Show("Файл не найден!");
@@ -58,7 +58,7 @@ namespace VologdaHackathon
 
         private void button3_Click(object sender, EventArgs e)
         {
-            string filePath = @"./Files/3.py";
+            string filePath = @"C:\Users\Arraki\VologdaHackathon\VologdaHackathon\bin\Debug\Files\3.py";
             if (!File.Exists(filePath))
             {
                 MessageBox.Show("Файл не найден!");
@@ -80,7 +80,7 @@ namespace VologdaHackathon
 
         private void button4_Click(object sender, EventArgs e)
         {
-            string filePath = @"./Files/4.py";
+            string filePath = @"C:\Users\Arraki\VologdaHackathon\VologdaHackathon\bin\Debug\Files\4.py";
             if (!File.Exists(filePath))
             {
                 MessageBox.Show("Файл не найден!");
