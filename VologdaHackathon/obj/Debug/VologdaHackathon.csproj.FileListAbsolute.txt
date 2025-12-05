@@ -1,0 +1,11 @@
+C:\Users\Arraki\VologdaHackathon\VologdaHackathon\bin\Debug\VologdaHackathon.exe.config
+C:\Users\Arraki\VologdaHackathon\VologdaHackathon\bin\Debug\VologdaHackathon.exe
+C:\Users\Arraki\VologdaHackathon\VologdaHackathon\bin\Debug\VologdaHackathon.pdb
+C:\Users\Arraki\VologdaHackathon\VologdaHackathon\obj\Debug\VologdaHackathon.csproj.AssemblyReference.cache
+C:\Users\Arraki\VologdaHackathon\VologdaHackathon\obj\Debug\VologdaHackathon.Form1.resources
+C:\Users\Arraki\VologdaHackathon\VologdaHackathon\obj\Debug\VologdaHackathon.Properties.Resources.resources
+C:\Users\Arraki\VologdaHackathon\VologdaHackathon\obj\Debug\VologdaHackathon.csproj.GenerateResource.cache
+C:\Users\Arraki\VologdaHackathon\VologdaHackathon\obj\Debug\VologdaHackathon.csproj.CoreCompileInputs.cache
+C:\Users\Arraki\VologdaHackathon\VologdaHackathon\obj\Debug\VologdaHackathon.exe
+C:\Users\Arraki\VologdaHackathon\VologdaHackathon\obj\Debug\VologdaHackathon.pdb
+C:\Users\Arraki\VologdaHackathon\VologdaHackathon\obj\Debug\VologdaHackathon.exe.config
