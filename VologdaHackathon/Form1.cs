@@ -14,7 +14,7 @@ namespace VologdaHackathon
 
         private void button1_Click(object sender, EventArgs e)
         {
-            string filePath = @"C:\Users\Arraki\VologdaHackathon\VologdaHackathon\bin\Debug\Files\1.py";
+            string filePath = Path.Combine(Application.StartupPath, "Files", "1.py");
             if (!File.Exists(filePath))
             {
                 MessageBox.Show("Файл не найден!");
@@ -36,7 +36,7 @@ namespace VologdaHackathon
 
         private void button2_Click(object sender, EventArgs e)
         {
-            string filePath = @"C:\Users\Arraki\VologdaHackathon\VologdaHackathon\bin\Debug\Files\2.py";
+            string filePath = Path.Combine(Application.StartupPath, "Files", "2.py");
             if (!File.Exists(filePath))
             {
                 MessageBox.Show("Файл не найден!");
@@ -56,9 +56,9 @@ namespace VologdaHackathon
             }
         }
 
-        private void button3_Click(object sender, EventArgs e)
+        private async void button3_Click(object sender, EventArgs e)
         {
-            string filePath = @"C:\Users\Arraki\VologdaHackathon\VologdaHackathon\bin\Debug\Files\3.py";
+            string filePath = Path.Combine(Application.StartupPath, "Files", "3.py");
             if (!File.Exists(filePath))
             {
                 MessageBox.Show("Файл не найден!");
@@ -66,11 +66,16 @@ namespace VologdaHackathon
             }
             try
             {
-                Process.Start(new ProcessStartInfo
+                ProcessStartInfo processInfo = new ProcessStartInfo
                 {
                     FileName = filePath,
                     UseShellExecute = true
-                });
+                };
+                Process process = new Process();
+                process.StartInfo = processInfo;
+                process.Start();
+                await process.StandardInput.WriteLineAsync(comboBox1.Text);
+                process.StandardInput.Close();
             }
             catch (Exception ex)
             {
@@ -80,7 +85,7 @@ namespace VologdaHackathon
 
         private void button4_Click(object sender, EventArgs e)
         {
-            string filePath = @"C:\Users\Arraki\VologdaHackathon\VologdaHackathon\bin\Debug\Files\4.py";
+            string filePath = Path.Combine(Application.StartupPath, "Files", "4.py");
             if (!File.Exists(filePath))
             {
                 MessageBox.Show("Файл не найден!");
